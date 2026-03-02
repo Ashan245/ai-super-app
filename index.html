@@ -1,31 +1,77 @@
 <!DOCTYPE html>
-<html>
+<html lang="si">
 <head>
-    <title>මගේ AI ඇප් එක</title>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ashan AI - Smart Assistant</title>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background-color: #f4f4f9; text-align: center; }
+        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        input { width: 80%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 10px 20px; background-color: #0288d1; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        #response { margin-top: 20px; text-align: left; padding: 10px; border-left: 4px solid #0288d1; background: #e1f5fe; min-height: 50px; }
+    </style>
 </head>
 <body>
-    <h2>AI Smart Notes</h2>
-    <input type="text" id="userInput" placeholder="යමක් ලියන්න...">
-    <button onclick="askAI()">AI ගෙන් අහන්න</button>
-    <p id="response"></p>
 
-    <script>
-        async function askAI() {
-            const apiKey = "AIzaSyAS_OC5iZUQCcSyCZvElCW0ejLpTtvXF2g"; 
-            const text = document.getElementById("userInput").value;
-            
-            // මෙතැනදී Google AI Studio API එකට දත්ත යවයි
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
-                method: "POST",
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({contents: [{parts: [{text: text}]}]})
-            });
-            
-            const data = await response.json();
-            document.getElementById("response").innerText = data.candidates[0].content.parts[0].text;
-        }
-    </script>
+<div class="container">
+    <h2>Ashan AI Assistant</h2>
+    <input type="text" id="userInput" placeholder="ඔබට දැනගන්න ඕන දේ මෙතන ලියන්න...">
+    <br>
+    <button onclick="askAI()">AI ගෙන් අහන්න</button>
+    
+    <div id="response">ඔබේ පිළිතුර මෙතැන දර්ශනය වේවි...</div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+
+  // ඔබ ලබාදුන් Firebase Config එක
+  const firebaseConfig = {
+    apiKey: "AIzaSyAPvqWA2NH5sfO-_jK6rHa74tL69yBdYC0",
+    authDomain: "ashanai-143d0.firebaseapp.com",
+    projectId: "ashanai-143d0",
+    storageBucket: "ashanai-143d0.firebasestorage.app",
+    messagingSenderId: "90717323152",
+    appId: "1:90717323152:web:3c46635dd1898c374bbd15",
+    measurementId: "G-9NVSZCQ2RM"
+  };
+
+  // Firebase Initialize කිරීම
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+
+  // AI Function එක (මෙය සාමාන්‍ය Script එකක් ලෙස ක්‍රියා කිරීමට window එකට එකතු කරයි)
+  window.askAI = async function() {
+      const display = document.getElementById("response");
+      const input = document.getElementById("userInput").value;
+      
+      if(!input) return alert("කරුණාකර ප්‍රශ්නයක් ඇතුළත් කරන්න!");
+
+      display.innerText = "සිතමින් පවතී...";
+
+      // වැදගත්: මෙතැනට ඔබේ Google AI Studio API Key එක දාන්න
+      const GEMINI_API_KEY = "AIzaSyAS_OC5iZUQCcSyCZvElCW0ejLpTtvXF2g"; 
+
+      try {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                  contents: [{ parts: [{ text: input }] }]
+              })
+          });
+
+          const data = await res.json();
+          const aiText = data.candidates[0].content.parts[0].text;
+          display.innerText = aiText;
+      } catch (error) {
+          display.innerText = "දෝෂයක් සිදු විය. නැවත උත්සාහ කරන්න.";
+          console.error(error);
+      }
+  }
+</script>
+
 </body>
 </html>
-
