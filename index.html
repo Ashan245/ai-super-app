@@ -3,37 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ashan AI - Smart Assistant</title>
+    <title>Ashan AI Assistant</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; background-color: #f4f4f9; text-align: center; }
-        .container { max-width: 500px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        input { width: 80%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; }
-        button { padding: 10px 20px; background-color: #0288d1; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        #response { margin-top: 20px; text-align: left; padding: 10px; border-left: 4px solid #0288d1; background: #e1f5fe; min-height: 50px; }
+        /* CSS කොටස */
+        body { font-family: sans-serif; background-color: #121212; color: white; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { width: 90%; max-width: 400px; background: #1e1e1e; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; }
+        h2 { color: #00e5ff; }
+        input { width: 100%; padding: 12px; margin: 15px 0; border: none; border-radius: 8px; background: #333; color: white; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: linear-gradient(45deg, #00c853, #b2ff59); border: none; border-radius: 8px; color: #000; font-weight: bold; cursor: pointer; }
+        #response { margin-top: 20px; padding: 15px; background: #262626; border-radius: 8px; min-height: 50px; font-size: 14px; text-align: left; border-left: 4px solid #00e5ff; white-space: pre-wrap; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Ashan AI Assistant</h2>
-    <input type="text" id="userInput" placeholder="ඔබට දැනගන්න ඕන දේ මෙතන ලියන්න...">
-    <br>
-    <button onclick="askAI()">AI ගෙන් අහන්න</button>
-    
-    <div id="response">ඔබේ පිළිතුර මෙතැන දර්ශනය වේවි...</div>
-</div>
+    <div class="container">
+        <h2>Ashan AI</h2>
+        <input type="text" id="userInput" placeholder="ප්‍රශ්නය මෙතැන ලියන්න...">
+        <button id="sendBtn">AI ගෙන් අහන්න</button>
+        <div id="response">ඔබට උදව් කරන්නේ කෙසේද?</div>
+    </div>
 
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+    <script>
+        // JavaScript කොටස
+        const GEMINI_API_KEY = "AIzaSyAS_OC5iZUQCcSyCZvElCW0ejLpTtvXF2g"; 
 
-  // ඔබ ලබාදුන් Firebase Config එක
-  const firebaseConfig = {
-    apiKey: "AIzaSyAPvqWA2NH5sfO-_jK6rHa74tL69yBdYC0",
-    authDomain: "ashanai-143d0.firebaseapp.com",
-    projectId: "ashanai-143d0",
-    storageBucket: "ashanai-143d0.firebasestorage.app",
-    messagingSenderId: "90717323152",
+        async function askAI() {
+            const inputField = document.getElementById("userInput");
+            const display = document.getElementById("response");
+            const text = inputField.value;
+
+            if (!text) {
+                alert("කරුණාකර යමක් ලියන්න!");
+                return;
+            }
+
+            display.innerText = "සිතමින් පවතී... 🤖";
+
+            try {
+                // API URL එක සහ හරිම Model එක (Gemini 1.5 Flash)
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+                
+                const response = await fetch(url, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: text }] }]
+                    })
+                });
+
+                const data = await response.json();
+
+                // වැරැද්දක් ඇත්නම් කෙලින්ම Screen එකේ පෙන්වන්න
+                if (data.error) {
+                    display.innerText = "API Error: " + data.error.message;
+                    console.error(data.error);
+                } else if (data.candidates && data.candidates[0].content.parts[0].text) {
+                    display.innerText = data.candidates[0].content.parts[0].text;
+                } else {
+                    display.innerText = "පිළිතුරක් ලැබුණේ නැත. නැවත උත්සාහ කරන්න.";
+                }
+
+            } catch (error) {
+                display.innerText = "සම්බන්ධතාවයේ දෝෂයක්: " + error.message;
+                alert("Network Error! කරුණාකර ඉන්ටර්නෙට් පරීක්ෂා කරන්න.");
+            }
+        }
+
+        // Button එක වැඩ කරන බව තහවුරු කිරීම
+        document.getElementById("sendBtn").onclick = askAI;
+    </script>
+
+</body>
+</html>
     appId: "1:90717323152:web:3c46635dd1898c374bbd15",
     measurementId: "G-9NVSZCQ2RM"
   };
